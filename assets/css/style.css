@@ -11,9 +11,10 @@
   --grid: #e4e6e0;
   --baseline: #c7c9c0;
   --border: rgba(11, 11, 11, 0.09);
-  --brand: #1f7a4d;
-  --brand-strong: #145c39;
-  --brand-tint: #e9f5ee;
+  --brand: #b9a073;       /* شعار الجمعية - ذهبي */
+  --brand-text: #7d642f;  /* نص على سطح فاتح */
+  --brand-ink: #241d10;   /* نص على خلفية ذهبية */
+  --brand-tint: #f6f1e6;
 
   --series-1: #2a78d6; /* blue */
   --series-2: #008300; /* green */
@@ -43,9 +44,10 @@
     --grid: #2c2d29;
     --baseline: #3a3b36;
     --border: rgba(255,255,255,0.10);
-    --brand: #3ecb7e;
-    --brand-strong: #7fe0ac;
-    --brand-tint: rgba(62,203,126,0.12);
+    --brand: #cdb37e;
+    --brand-text: #d9bd85;
+    --brand-ink: #241d10;
+    --brand-tint: rgba(205,179,126,0.14);
 
     --series-1: #3987e5;
     --series-2: #2fae55;
@@ -73,9 +75,10 @@
   --grid: #2c2d29;
   --baseline: #3a3b36;
   --border: rgba(255,255,255,0.10);
-  --brand: #3ecb7e;
-  --brand-strong: #7fe0ac;
-  --brand-tint: rgba(62,203,126,0.12);
+  --brand: #cdb37e;
+  --brand-text: #d9bd85;
+  --brand-ink: #241d10;
+  --brand-tint: rgba(205,179,126,0.14);
 
   --series-1: #3987e5;
   --series-2: #2fae55;
@@ -128,8 +131,10 @@ a { color: inherit; }
   width: 42px; height: 42px; border-radius: 11px;
   background: var(--brand-tint);
   display: flex; align-items: center; justify-content: center;
-  font-size: 19px; flex-shrink: 0;
+  flex-shrink: 0;
+  padding: 6px;
 }
+.brand-mark img { width: 100%; height: 100%; object-fit: contain; }
 
 /* ---------- Tabs ---------- */
 .tabs {
@@ -158,7 +163,7 @@ a { color: inherit; }
   gap: 6px;
 }
 .tab-link:hover { background: var(--surface-2); color: var(--text-primary); }
-.tab-link.active { background: var(--brand); color: #fff; font-weight: 600; }
+.tab-link.active { background: var(--brand); color: var(--brand-ink); font-weight: 600; }
 .tab-badge {
   background: var(--critical);
   color: #fff;
@@ -169,7 +174,7 @@ a { color: inherit; }
   min-width: 16px;
   text-align: center;
 }
-.tab-link.active .tab-badge { background: rgba(255,255,255,0.28); }
+.tab-link.active .tab-badge { background: rgba(36,29,16,0.22); color: var(--brand-ink); }
 
 .btn {
   border: 1px solid var(--border);
@@ -185,7 +190,7 @@ a { color: inherit; }
   font-family: inherit;
 }
 .btn:hover { background: var(--surface-2); }
-.btn-primary { background: var(--brand); color: #fff; border-color: transparent; }
+.btn-primary { background: var(--brand); color: var(--brand-ink); border-color: transparent; }
 .btn-primary:hover { filter: brightness(1.06); }
 .btn-ghost { background: transparent; border-color: transparent; }
 .btn-sm { padding: 6px 10px; font-size: 12px; border-radius: 8px; }
@@ -255,7 +260,7 @@ section.view.active { display: block; }
 }
 .goal-card.highlight { background: var(--brand-tint); border-color: transparent; }
 .goal-name { font-size: 13.5px; font-weight: 700; margin-bottom: 8px; }
-.goal-budget { font-size: 18px; font-weight: 700; color: var(--brand); margin-bottom: 12px; }
+.goal-budget { font-size: 18px; font-weight: 700; color: var(--brand-text); margin-bottom: 12px; }
 .goal-meta-row { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--text-secondary); margin-bottom: 6px; }
 .goal-count-badge {
   background: var(--surface-2);
