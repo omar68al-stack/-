@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>جمعية إعمار المرافق — لوحة القرار التنفيذية</title>
+<link rel="stylesheet" href="assets/css/style.css" />
+</head>
+<body>
+<div class="app-shell">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark">🏛️</div>
+      <div>
+        <div class="brand-name" id="org-name">جمعية إعمار المرافق</div>
+        <div class="brand-tagline" id="org-tagline">الذراع التنفيذي للأمانة</div>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <button class="nav-link active" data-view="view-overview"><span class="ico">📊</span> نظرة عامة</button>
+      <button class="nav-link" data-view="view-projects"><span class="ico">🏗️</span> المشاريع والمبادرات</button>
+      <button class="nav-link" data-view="view-decisions">
+        <span class="ico">✅</span> مركز القرار
+        <span class="nav-badge" id="decisions-badge" style="display:none">0</span>
+      </button>
+      <button class="nav-link" data-view="view-risks"><span class="ico">⚠️</span> المخاطر</button>
+      <button class="nav-link" data-view="view-about"><span class="ico">ℹ️</span> عن الخطة التشغيلية</button>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div id="org-period">الخطة التشغيلية 2026</div>
+      <div>تحديث: <span id="last-update"></span></div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <div class="topbar">
+      <div>
+        <h1>مرحبًا، <span id="chairman-title">رئيس مجلس الإدارة</span></h1>
+        <div class="sub">لوحة متابعة الأداء واتخاذ القرار — جمعية إعمار المرافق</div>
+      </div>
+      <div class="topbar-actions">
+        <button class="btn" id="theme-toggle">🌓 المظهر</button>
+        <button class="btn" id="print-btn">🖨️ تصدير / طباعة</button>
+      </div>
+    </div>
+
+    <!-- نظرة عامة -->
+    <section class="view active" id="view-overview">
+      <div class="grid grid-4" id="kpi-grid"></div>
+
+      <div class="grid grid-2" style="margin-top:16px">
+        <div class="card">
+          <h3>تقدّم الأهداف الاستراتيجية</h3>
+          <div id="goals-chart"></div>
+        </div>
+        <div class="card">
+          <h3>توزيع حالة المشاريع</h3>
+          <div class="donut-wrap">
+            <div id="status-donut"></div>
+            <div id="status-legend" class="legend"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="card" style="margin-top:16px">
+        <h3>الميزانية حسب الفئة <span class="card-note">بالآلاف (ريال)</span></h3>
+        <div class="bars-chart" id="budget-chart"></div>
+        <div class="legend">
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--series-1)"></span> المخصص</div>
+          <div class="legend-item"><span class="legend-swatch" style="background:var(--series-2)"></span> المصروف</div>
+        </div>
+      </div>
+    </section>
+
+    <!-- المشاريع -->
+    <section class="view" id="view-projects">
+      <h2 class="section-title">المشاريع والمبادرات</h2>
+      <p class="section-sub">محفظة المشاريع الجارية ضمن الخطة التشغيلية</p>
+
+      <div class="card" style="margin-bottom:16px">
+        <h3>الجدول الزمني (ربع سنوي)</h3>
+        <div id="timeline-chart"></div>
+      </div>
+
+      <div class="card">
+        <h3>قائمة المشاريع</h3>
+        <div class="filters-row" id="project-filters"></div>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>المشروع</th><th>الفئة</th><th>الحالة</th><th>الإنجاز</th>
+                <th>الميزانية (مخصص/مصروف)</th><th>الجهة المسؤولة</th><th>الموعد المستهدف</th>
+              </tr>
+            </thead>
+            <tbody id="projects-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- مركز القرار -->
+    <section class="view" id="view-decisions">
+      <h2 class="section-title">مركز القرار</h2>
+      <p class="section-sub">القرارات المرفوعة لرئيس مجلس الإدارة للاعتماد أو التأجيل أو الرفض</p>
+      <div id="decisions-list"></div>
+    </section>
+
+    <!-- المخاطر -->
+    <section class="view" id="view-risks">
+      <h2 class="section-title">سجل المخاطر</h2>
+      <p class="section-sub">أبرز المخاطر المؤثرة على تنفيذ الخطة التشغيلية</p>
+      <div class="card">
+        <div class="table-wrap">
+          <table>
+            <thead><tr><th>المخاطرة</th><th>مستوى الأثر</th><th>احتمالية الحدوث</th></tr></thead>
+            <tbody id="risks-tbody"></tbody>
+          </table>
+        </div>
+      </div>
+    </section>
+
+    <!-- عن الخطة -->
+    <section class="view" id="view-about">
+      <h2 class="section-title">عن الخطة التشغيلية</h2>
+      <p class="section-sub">جمعية إعمار المرافق — الذراع التنفيذي للأمانة</p>
+      <div class="grid grid-2">
+        <div class="card">
+          <h3>الرؤية والرسالة</h3>
+          <p style="font-size:13px; line-height:1.9; color:var(--text-secondary)">
+            <b style="color:var(--text-primary)">الرؤية:</b> أن تكون المرافق العامة نموذجًا في الجودة والجمال والاستدامة.<br/><br/>
+            <b style="color:var(--text-primary)">الرسالة:</b> رعاية المرافق العامة وإعادة تأهيلها بأعلى معايير الجودة، بالشراكة مع المجتمع، لخدمة المستفيدين.
+          </p>
+        </div>
+        <div class="card">
+          <h3>ملاحظة حول البيانات</h3>
+          <p style="font-size:13px; line-height:1.9; color:var(--text-secondary)">
+            جميع الأرقام والمشاريع المعروضة حاليًا هي بيانات <b style="color:var(--text-primary)">تجريبية للعرض التوضيحي</b>.
+            لعرض الأرقام الفعلية، حدّث ملف <code>assets/js/data.js</code> ببيانات الخطة التشغيلية المعتمدة.
+            قرارات "مركز القرار" تُحفظ حاليًا في متصفح المستخدم فقط؛ لمشاركتها بين عدة مستخدمين يلزم ربط الموقع بقاعدة بيانات/خادم خلفي.
+          </p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<div id="tooltip" style="position:fixed; display:none; z-index:50; background:var(--text-primary); color:var(--surface); font-size:12px; padding:5px 9px; border-radius:8px; pointer-events:none; max-width:220px;"></div>
+
+<script src="assets/js/data.js"></script>
+<script src="assets/js/charts.js"></script>
+<script src="assets/js/app.js"></script>
+</body>
+</html>
