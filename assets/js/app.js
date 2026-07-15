@@ -1,96 +1,203 @@
 const STORAGE_KEY = "emaar-decisions-state-v1";
 const THEME_KEY = "emaar-theme";
 
-const STATUS_BADGE = {
-  "مكتمل": "good",
-  "قيد التنفيذ": "warning",
-  "متأخر": "critical",
-  "لم يبدأ": "muted",
+const PERSPECTIVE_BY_KEY = Object.fromEntries(PERSPECTIVES.map((p) => [p.key, p]));
+
+const SUPPORT_BADGE = {
+  "للتسويق": "warning",
+  "داخلي": "muted",
+  "مدعومة": "good",
 };
 const IMPACT_LABEL = { good: "منخفض", warning: "متوسط", serious: "مرتفع", critical: "حرج" };
 
 function loadDecisionState() {
-  try {
-    return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {};
-  } catch {
-    return {};
-  }
+  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
 }
-function saveDecisionState(state) {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(state));
+function saveDecisionState(state) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
+
+function fmtSAR(n) { return `${Number(n).toLocaleString("ar")} ريال`; }
+
+function initiativeProgress(init) {
+  if (!init.target) return 0;
+  return Math.max(0, Math.min(100, Math.round((init.achieved / init.target) * 100)));
+}
+function daysBetween(a, b) { return (b - a) / 86400000; }
+function elapsedPct(init) {
+  const start = new Date(init.start), end = new Date(init.end), today = new Date();
+  const total = daysBetween(start, end);
+  if (total <= 0) return 100;
+  return Math.max(0, Math.min(100, Math.round((daysBetween(start, today) / total) * 100)));
+}
+function initiativeStatus(init) {
+  const progress = initiativeProgress(init);
+  const today = new Date();
+  const start = new Date(init.start), end = new Date(init.end);
+  if (progress >= 100) return "مكتمل";
+  if (today < start) return "لم يبدأ";
+  if (today > end) return "متأخر";
+  return "قيد التنفيذ";
+}
+function targetLabel(init) {
+  return init.targetIsPercent ? `${init.target}%` : init.target.toLocaleString("ar");
+}
+function achievedLabel(init) {
+  return init.targetIsPercent ? `${init.achieved}%` : init.achieved.toLocaleString("ar");
 }
 
-function badge(statusLabel) {
-  const kind = STATUS_BADGE[statusLabel] || "muted";
-  return `<span class="badge badge-${kind}"><span class="dot" style="background:var(--${kind === "muted" ? "muted-status" : kind})"></span>${statusLabel}</span>`;
+function badge(kind, label) {
+  return `<span class="badge badge-${kind}"><span class="dot" style="background:var(--${kind === "muted" ? "muted-status" : kind})"></span>${label}</span>`;
+}
+function statusBadge(statusLabel) {
+  const kind = { "مكتمل": "good", "قيد التنفيذ": "warning", "متأخر": "critical", "لم يبدأ": "muted" }[statusLabel] || "muted";
+  return badge(kind, statusLabel);
+}
+function supportBadge(label) {
+  return badge(SUPPORT_BADGE[label] || "muted", label);
+}
+function perspectivePill(key) {
+  const p = PERSPECTIVE_BY_KEY[key];
+  return `<span class="pill" style="background:color-mix(in srgb, var(${p.seriesVar}) 16%, transparent); color:var(${p.seriesVar})">${p.name}</span>`;
+}
+
+// ---------- تجميعات مشتقة من قائمة المبادرات ----------
+function computeAggregates() {
+  const inits = DASHBOARD_DATA.initiatives;
+  const totalBudget = inits.reduce((s, i) => s + i.budget, 0);
+  const totalSpent = inits.reduce((s, i) => s + i.spent, 0);
+  const avgProgress = Math.round(inits.reduce((s, i) => s + initiativeProgress(i), 0) / inits.length);
+  const planElapsed = elapsedPct({ start: DASHBOARD_DATA.planStart, end: DASHBOARD_DATA.planEnd });
+
+  const perspectiveStats = PERSPECTIVES.map((p) => {
+    const items = inits.filter((i) => i.perspective === p.key);
+    const budget = items.reduce((s, i) => s + i.budget, 0);
+    const progress = items.length ? Math.round(items.reduce((s, i) => s + initiativeProgress(i), 0) / items.length) : 0;
+    return { ...p, budget, progress, count: items.length };
+  });
+
+  return { totalBudget, totalSpent, avgProgress, planElapsed, perspectiveStats };
 }
 
 function renderKPIs() {
-  const el = document.getElementById("kpi-grid");
-  el.innerHTML = DASHBOARD_DATA.kpis
+  const agg = computeAggregates();
+  const kpis = [
+    { label: "إجمالي المبادرات التنفيذية", value: DASHBOARD_DATA.initiatives.length, unit: "مبادرة", note: "عبر 4 أبعاد استراتيجية" },
+    { label: "إجمالي الميزانية المعتمدة", value: agg.totalBudget.toLocaleString("ar"), unit: "ريال", note: agg.totalSpent > 0 ? `صُرف ${agg.totalSpent.toLocaleString("ar")} ريال` : "لم يُسجَّل صرف حتى تاريخه" },
+    { label: "متوسط نسبة تحقق المؤشرات", value: agg.avgProgress, unit: "%", note: "بحسب آخر تحديث في الملف المصدر" },
+    { label: "الوقت المنقضي من عمر الخطة", value: agg.planElapsed, unit: "%", note: `${DASHBOARD_DATA.planStart} — ${DASHBOARD_DATA.planEnd}` },
+  ];
+  document.getElementById("kpi-grid").innerHTML = kpis
     .map(
       (k) => `
     <div class="card stat-tile">
       <div class="stat-label">${k.label}</div>
       <div class="stat-value">${k.value}<span class="unit">${k.unit}</span></div>
-      <div class="stat-delta ${k.trend}">${k.trend === "up" ? "▲" : k.trend === "down" ? "▼" : "―"} ${k.delta}</div>
+      <div class="stat-delta">${k.note}</div>
     </div>`
     )
     .join("");
 }
 
-function renderProjectsTable(filterStatus) {
+function renderPerspectiveSummary() {
+  const agg = computeAggregates();
+  const topKey = agg.perspectiveStats.slice().sort((a, b) => b.budget - a.budget)[0].key;
+  document.getElementById("perspective-summary").innerHTML = agg.perspectiveStats
+    .map(
+      (p) => `
+    <div class="goal-card ${p.key === topKey ? "highlight" : ""}">
+      <div class="goal-name">${p.name}</div>
+      <div class="goal-budget">${p.budget.toLocaleString("ar")} ر.س</div>
+      <div class="goal-meta-row">
+        <span class="goal-count-badge">${p.count}</span> عدد المبادرات
+      </div>
+      <div class="goal-progress-value">${p.progress}% نسبة الإنجاز</div>
+      <div class="hbar-track"><div class="hbar-fill" style="width:${p.progress}%; background:var(${p.seriesVar})"></div></div>
+    </div>`
+    )
+    .join("");
+
+  const top = agg.perspectiveStats.find((p) => p.key === topKey);
+  const pct = Math.round((top.budget / agg.totalBudget) * 100);
+  document.getElementById("budget-concentration-note").textContent =
+    `${pct}% من الميزانية الإجمالية (${agg.totalBudget.toLocaleString("ar")} ريال) موجَّه إلى "${top.name}" وحده.`;
+}
+
+function matchesSearch(init, term) {
+  if (!term) return true;
+  const hay = `${init.name} ${init.kpi} ${init.owner}`.toLowerCase();
+  return hay.includes(term.toLowerCase());
+}
+
+function renderInitiativesTable() {
+  const perspective = document.getElementById("perspective-select").value;
+  const term = document.getElementById("search-input").value.trim();
   const tbody = document.getElementById("projects-tbody");
-  const rows = DASHBOARD_DATA.projects.filter((p) => !filterStatus || p.status === filterStatus);
+  const rows = DASHBOARD_DATA.initiatives.filter(
+    (i) => (!perspective || i.perspective === perspective) && matchesSearch(i, term)
+  );
   if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="7"><div class="empty-state">لا توجد مشاريع مطابقة</div></td></tr>`;
+    tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">لا توجد مبادرات مطابقة</div></td></tr>`;
     return;
   }
   tbody.innerHTML = rows
-    .map(
-      (p) => `
-    <tr>
-      <td>${p.name}</td>
-      <td>${p.category}</td>
-      <td>${badge(p.status)}</td>
+    .map((i) => {
+      const progress = initiativeProgress(i);
+      const status = initiativeStatus(i);
+      const rowId = `init-desc-${i.id}`;
+      return `
+    <tr class="init-row" data-target="${rowId}" style="cursor:pointer">
+      <td>${perspectivePill(i.perspective)}</td>
+      <td class="cell-nowrap">${i.name} <span style="color:var(--text-muted); font-size:11px">ⓘ</span></td>
+      <td>${statusBadge(status)}</td>
       <td>
         <div class="progress-cell">
-          <div class="hbar-track" style="width:70px"><div class="hbar-fill" style="width:${p.progress}%; background:var(--series-1)"></div></div>
-          <span>${p.progress}%</span>
+          <div class="hbar-track" style="width:70px"><div class="hbar-fill" style="width:${progress}%; background:var(${PERSPECTIVE_BY_KEY[i.perspective].seriesVar})"></div></div>
+          <span class="cell-nowrap">${progress}%</span>
         </div>
       </td>
-      <td>${p.allocated.toLocaleString("ar")} / ${p.spent.toLocaleString("ar")} ألف ريال</td>
-      <td>${p.owner}</td>
-      <td>${p.due}</td>
-    </tr>`
-    )
+      <td class="cell-nowrap">${i.kpi}: ${achievedLabel(i)} / ${targetLabel(i)}</td>
+      <td class="cell-nowrap">${fmtSAR(i.budget)}</td>
+      <td class="cell-nowrap">${i.owner}</td>
+      <td>${supportBadge(i.support)}</td>
+    </tr>
+    <tr class="init-desc-row" id="${rowId}" style="display:none">
+      <td colspan="8">
+        <div class="cell-desc" style="max-width:none; padding:4px 2px">
+          ${i.description}<br/>
+          <span style="color:var(--text-muted)">الفترة: ${i.start} — ${i.end} · الوقت المنقضي من مدة المبادرة: ${elapsedPct(i)}%</span>
+        </div>
+      </td>
+    </tr>`;
+    })
     .join("");
-}
 
-function renderProjectFilters() {
-  const wrap = document.getElementById("project-filters");
-  const statuses = ["الكل", ...Array.from(new Set(DASHBOARD_DATA.projects.map((p) => p.status)))];
-  wrap.innerHTML = statuses
-    .map((s, i) => `<button class="chip ${i === 0 ? "active" : ""}" data-status="${s === "الكل" ? "" : s}">${s}</button>`)
-    .join("");
-  wrap.querySelectorAll(".chip").forEach((chip) => {
-    chip.addEventListener("click", () => {
-      wrap.querySelectorAll(".chip").forEach((c) => c.classList.remove("active"));
-      chip.classList.add("active");
-      renderProjectsTable(chip.getAttribute("data-status"));
+  tbody.querySelectorAll(".init-row").forEach((row) => {
+    row.addEventListener("click", () => {
+      const desc = document.getElementById(row.getAttribute("data-target"));
+      desc.style.display = desc.style.display === "none" ? "table-row" : "none";
     });
   });
 }
 
+function initTableControls() {
+  const select = document.getElementById("perspective-select");
+  PERSPECTIVES.forEach((p) => {
+    const opt = document.createElement("option");
+    opt.value = p.key;
+    opt.textContent = p.name;
+    select.appendChild(opt);
+  });
+  select.addEventListener("change", renderInitiativesTable);
+  document.getElementById("search-input").addEventListener("input", renderInitiativesTable);
+}
+
 function renderRisks() {
-  const tbody = document.getElementById("risks-tbody");
-  tbody.innerHTML = DASHBOARD_DATA.risks
+  document.getElementById("risks-tbody").innerHTML = DASHBOARD_DATA.risks
     .map(
       (r) => `
     <tr>
-      <td>${r.risk}</td>
-      <td><span class="badge badge-${r.impact === "good" ? "good" : r.impact}"><span class="dot" style="background:var(--${r.impact})"></span>${IMPACT_LABEL[r.impact]}</span></td>
-      <td>${r.likelihood}</td>
+      <td class="cell-desc" style="max-width:520px">${r.risk}</td>
+      <td>${badge(r.impact, IMPACT_LABEL[r.impact])}</td>
+      <td class="cell-nowrap">${r.likelihood}</td>
     </tr>`
     )
     .join("");
@@ -176,8 +283,8 @@ function updateDecisionBadge() {
   }
 }
 
-function initNav() {
-  const links = document.querySelectorAll(".nav-link[data-view]");
+function initTabs() {
+  const links = document.querySelectorAll(".tab-link[data-view]");
   const views = document.querySelectorAll("section.view");
   links.forEach((link) => {
     link.addEventListener("click", () => {
@@ -202,29 +309,24 @@ function initTheme() {
   });
 }
 
-function initHeader() {
-  document.getElementById("org-name").textContent = DASHBOARD_DATA.org.name;
-  document.getElementById("org-tagline").textContent = DASHBOARD_DATA.org.tagline;
-  document.getElementById("org-period").textContent = DASHBOARD_DATA.org.period;
+function renderAll() {
   document.getElementById("last-update").textContent = new Date().toLocaleDateString("ar-SA-u-ca-gregory", {
     year: "numeric", month: "long", day: "numeric",
   });
-}
-
-document.addEventListener("DOMContentLoaded", () => {
-  initHeader();
-  initNav();
-  initTheme();
   renderKPIs();
-  renderStrategicGoals("goals-chart", DASHBOARD_DATA.strategicGoals);
-  renderBudgetChart("budget-chart", DASHBOARD_DATA.budgetByCategory);
-  renderStatusDonut("status-donut", "status-legend", DASHBOARD_DATA.statusBreakdown);
-  renderTimeline("timeline-chart", DASHBOARD_DATA.timeline);
-  renderProjectFilters();
-  renderProjectsTable();
+  renderPerspectiveSummary();
+  renderInitiativesTable();
   renderRisks();
   renderDecisions();
   updateDecisionBadge();
+}
 
+document.addEventListener("DOMContentLoaded", () => {
+  initTabs();
+  initTheme();
+  initTableControls();
+  renderAll();
+
+  document.getElementById("refresh-btn").addEventListener("click", renderAll);
   document.getElementById("print-btn").addEventListener("click", () => window.print());
 });
