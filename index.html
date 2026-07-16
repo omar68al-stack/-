@@ -27,9 +27,6 @@
   <nav class="tabs">
     <button class="tab-link active" data-view="view-overview">نظرة عامة</button>
     <button class="tab-link" data-view="view-projects">المبادرات والمشاريع</button>
-    <button class="tab-link" data-view="view-decisions">
-      مركز القرار <span class="tab-badge" id="decisions-badge" style="display:none">0</span>
-    </button>
     <button class="tab-link" data-view="view-risks">المخاطر</button>
     <button class="tab-link" data-view="view-about">عن الخطة</button>
   </nav>
@@ -72,13 +69,6 @@
     </div>
   </section>
 
-  <!-- مركز القرار -->
-  <section class="view" id="view-decisions">
-    <h2 class="section-title">مركز القرار</h2>
-    <p class="section-sub">قرارات مستخلصة من فجوات وأرقام فعلية في الخطة التشغيلية، جاهزة لاعتماد رئيس مجلس الإدارة</p>
-    <div id="decisions-list"></div>
-  </section>
-
   <!-- المخاطر -->
   <section class="view" id="view-risks">
     <h2 class="section-title">ملاحظات ومخاطر استراتيجية</h2>
@@ -115,7 +105,6 @@
           الأرقام المعروضة مأخوذة من ملف الخطة التشغيلية المعتمد. عمود "المتبقي" يُحسب في هذه اللوحة
           كـ (الميزانية − المصروف) بدل الاعتماد على الملف مباشرة بسبب خطأ في معادلته الأصلية.
           لتحديث الأرقام لاحقًا، حدّث ملف <code>assets/js/data.js</code> بالقيم الجديدة.
-          قرارات "مركز القرار" تُحفظ في متصفح المستخدم فقط؛ لمشاركتها بين عدة مستخدمين يلزم ربط الموقع بقاعدة بيانات خلفية.
         </p>
       </div>
     </div>

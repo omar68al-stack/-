@@ -1,4 +1,3 @@
-const STORAGE_KEY = "emaar-decisions-state-v1";
 const THEME_KEY = "emaar-theme";
 
 const PERSPECTIVE_BY_KEY = Object.fromEntries(PERSPECTIVES.map((p) => [p.key, p]));
@@ -9,11 +8,6 @@ const SUPPORT_BADGE = {
   "مدعومة": "good",
 };
 const IMPACT_LABEL = { good: "منخفض", warning: "متوسط", serious: "مرتفع", critical: "حرج" };
-
-function loadDecisionState() {
-  try { return JSON.parse(localStorage.getItem(STORAGE_KEY)) || {}; } catch { return {}; }
-}
-function saveDecisionState(state) { localStorage.setItem(STORAGE_KEY, JSON.stringify(state)); }
 
 function fmtSAR(n) { return `${Number(n).toLocaleString("ar")} ريال`; }
 
@@ -203,86 +197,6 @@ function renderRisks() {
     .join("");
 }
 
-function pendingDecisionCount() {
-  const state = loadDecisionState();
-  return DASHBOARD_DATA.decisions.filter((d) => !state[d.id]).length;
-}
-
-function renderDecisions() {
-  const state = loadDecisionState();
-  const wrap = document.getElementById("decisions-list");
-  wrap.innerHTML = DASHBOARD_DATA.decisions
-    .map((d) => {
-      const resolved = state[d.id];
-      const actionLabel = resolved ? { approved: "تمت الموافقة", deferred: "تم التأجيل", rejected: "تم الرفض" }[resolved.action] : null;
-      const actionKind = resolved ? { approved: "good", deferred: "warning", rejected: "critical" }[resolved.action] : null;
-      return `
-      <div class="decision-card ${resolved ? "resolved" : ""}" data-id="${d.id}">
-        <div class="decision-head">
-          <div>
-            <div class="decision-title">${d.title}</div>
-            <div class="decision-meta">
-              <span>مقدَّم من: ${d.requestedBy}</span>
-              <span>الموعد النهائي: ${d.due}</span>
-              <span class="priority-pill priority-${d.priority}">أولوية ${d.priority}</span>
-            </div>
-          </div>
-        </div>
-        <div class="decision-body">
-          <div><b>السياق:</b> ${d.context}</div>
-          <div style="margin-top:6px"><b>التوصية:</b> ${d.recommendation}</div>
-        </div>
-        ${
-          resolved
-            ? `<div class="decision-status-line">
-                <span class="badge badge-${actionKind}">${actionLabel}</span>
-                ${resolved.note ? `<span>— ملاحظة: ${resolved.note}</span>` : ""}
-                <button class="btn btn-ghost btn-sm reopen-btn">تراجع عن القرار</button>
-              </div>`
-            : `<div class="decision-actions">
-                <button class="btn btn-approve btn-sm" data-action="approved">اعتماد</button>
-                <button class="btn btn-defer btn-sm" data-action="deferred">تأجيل</button>
-                <button class="btn btn-reject btn-sm" data-action="rejected">رفض</button>
-              </div>
-              <textarea class="decision-note-input" placeholder="أضف ملاحظة اختيارية على القرار..."></textarea>`
-        }
-      </div>`;
-    })
-    .join("");
-
-  wrap.querySelectorAll(".decision-card").forEach((card) => {
-    const id = card.getAttribute("data-id");
-    card.querySelectorAll("[data-action]").forEach((btn) => {
-      btn.addEventListener("click", () => {
-        const note = card.querySelector(".decision-note-input")?.value.trim() || "";
-        const st = loadDecisionState();
-        st[id] = { action: btn.getAttribute("data-action"), note, at: new Date().toISOString() };
-        saveDecisionState(st);
-        renderDecisions();
-        updateDecisionBadge();
-      });
-    });
-    card.querySelector(".reopen-btn")?.addEventListener("click", () => {
-      const st = loadDecisionState();
-      delete st[id];
-      saveDecisionState(st);
-      renderDecisions();
-      updateDecisionBadge();
-    });
-  });
-}
-
-function updateDecisionBadge() {
-  const badgeEl = document.getElementById("decisions-badge");
-  const n = pendingDecisionCount();
-  if (n > 0) {
-    badgeEl.textContent = n;
-    badgeEl.style.display = "inline-block";
-  } else {
-    badgeEl.style.display = "none";
-  }
-}
-
 function initTabs() {
   const links = document.querySelectorAll(".tab-link[data-view]");
   const views = document.querySelectorAll("section.view");
@@ -317,8 +231,6 @@ function renderAll() {
   renderPerspectiveSummary();
   renderInitiativesTable();
   renderRisks();
-  renderDecisions();
-  updateDecisionBadge();
 }
 
 document.addEventListener("DOMContentLoaded", () => {
