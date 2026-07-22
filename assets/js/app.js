@@ -233,12 +233,40 @@ function renderAll() {
   renderRisks();
 }
 
-document.addEventListener("DOMContentLoaded", () => {
+function renderSyncStatus() {
+  const el = document.getElementById("sync-status");
+  const sync = DASHBOARD_DATA._sync;
+  if (!sync) { el.textContent = ""; return; }
+  const time = sync.at.toLocaleTimeString("ar-SA-u-ca-gregory", { hour: "2-digit", minute: "2-digit" });
+  if (sync.ok) {
+    el.innerHTML = `<span class="badge badge-good"><span class="dot" style="background:var(--good)"></span>بيانات حيّة من الشيت — ${time}</span>`;
+  } else {
+    el.innerHTML = `<span class="badge badge-warning"><span class="dot" style="background:var(--warning)"></span>تعذّر الاتصال بالشيت، يُعرض آخر نسخة محفوظة</span>`;
+  }
+}
+
+async function refreshFromSheet() {
+  const btn = document.getElementById("refresh-btn");
+  btn.disabled = true;
+  const originalLabel = btn.textContent;
+  btn.textContent = "↻ يتم التحديث...";
+  await syncFromSheet();
+  renderAll();
+  renderSyncStatus();
+  btn.disabled = false;
+  btn.textContent = originalLabel;
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
   initTabs();
   initTheme();
   initTableControls();
   renderAll();
 
-  document.getElementById("refresh-btn").addEventListener("click", renderAll);
+  document.getElementById("refresh-btn").addEventListener("click", refreshFromSheet);
   document.getElementById("print-btn").addEventListener("click", () => window.print());
+
+  await syncFromSheet();
+  renderAll();
+  renderSyncStatus();
 });

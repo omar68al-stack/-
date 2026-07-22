@@ -16,6 +16,7 @@
       <div class="sub" id="org-tagline">جمعية إعمار المرافق — الذراع التنفيذي للأمانة</div>
     </div>
     <div class="topbar-actions">
+      <span id="sync-status"></span>
       <span class="last-update">آخر تحديث: <span id="last-update"></span></span>
       <button class="btn btn-primary" id="refresh-btn">↻ تحديث</button>
       <button class="btn" id="theme-toggle">🌓</button>
@@ -102,9 +103,11 @@
       <div class="card">
         <h3>ملاحظة حول البيانات</h3>
         <p style="font-size:13px; line-height:1.9; color:var(--text-secondary); margin-top:14px">
-          الأرقام المعروضة مأخوذة من ملف الخطة التشغيلية المعتمد. عمود "المتبقي" يُحسب في هذه اللوحة
-          كـ (الميزانية − المصروف) بدل الاعتماد على الملف مباشرة بسبب خطأ في معادلته الأصلية.
-          لتحديث الأرقام لاحقًا، حدّث ملف <code>assets/js/data.js</code> بالقيم الجديدة.
+          يجيب الموقع أحدث أرقام المبادرات مباشرة من شيت Google التشغيلي عند كل فتح للصفحة (وعند الضغط على زر "تحديث").
+          عمود "المتبقي" يُحسب في هذه اللوحة كـ (الميزانية − المصروف) بدل الاعتماد على عمود المتبقي في الشيت مباشرة
+          بسبب خطأ في معادلته الأصلية في تبويب "بعد المستفيدين".
+          إذا تعذّر الاتصال بالشيت (لا إنترنت مثلًا)، يعرض الموقع تلقائيًا آخر نسخة محفوظة محليًا
+          (<code>assets/js/data.js</code>) — وتظهر إشارة بذلك بجانب زر التحديث أعلى الصفحة.
         </p>
       </div>
     </div>
@@ -113,6 +116,7 @@
 </div>
 
 <script src="assets/js/data.js"></script>
+<script src="assets/js/sheet-sync.js"></script>
 <script src="assets/js/app.js"></script>
 </body>
 </html>
