@@ -123,18 +123,24 @@ a { color: inherit; }
   flex-wrap: wrap;
   margin-bottom: 16px;
 }
-.topbar-title h1 { font-size: 19px; margin: 0; }
-.topbar-title .sub { font-size: 12.5px; color: var(--text-secondary); margin-top: 3px; }
+.topbar-brand { display: flex; align-items: center; gap: 16px; }
+.topbar-divider { width: 1px; align-self: stretch; background: var(--border); }
+.topbar-title h1 { font-size: 20px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
+.topbar-title .sub { font-size: 13px; color: var(--text-secondary); margin-top: 4px; }
 .topbar-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .last-update { font-size: 12px; color: var(--text-muted); }
 .brand-mark {
-  width: 42px; height: 42px; border-radius: 11px;
+  width: 54px; height: 54px; border-radius: 14px;
   background: var(--brand-tint);
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
-  padding: 6px;
+  padding: 9px;
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--brand) 25%, transparent);
 }
 .brand-mark img { width: 100%; height: 100%; object-fit: contain; }
+@media (max-width: 560px) {
+  .topbar-divider { display: none; }
+}
 
 /* ---------- Tabs ---------- */
 .tabs {
