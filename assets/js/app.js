@@ -223,8 +223,12 @@ function renderSyncStatus() {
   const sync = DASHBOARD_DATA._sync;
   if (!sync) { el.textContent = ""; return; }
   const time = sync.at.toLocaleTimeString("ar-SA-u-ca-gregory", { hour: "2-digit", minute: "2-digit" });
-  if (sync.ok) {
+  if (sync.ok === true) {
     el.innerHTML = `<span class="badge badge-good"><span class="dot" style="background:var(--good)"></span>بيانات حيّة من الشيت — ${time}</span>`;
+  } else if (sync.ok === "partial") {
+    el.innerHTML = `
+      <span class="badge badge-warning"><span class="dot" style="background:var(--warning)"></span>بعض الأبعاد حيّة، والباقي من آخر نسخة محفوظة</span>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:4px; max-width:420px">${sync.error || ""}</div>`;
   } else {
     el.innerHTML = `
       <span class="badge badge-warning"><span class="dot" style="background:var(--warning)"></span>تعذّر الاتصال بالشيت، يُعرض آخر نسخة محفوظة</span>

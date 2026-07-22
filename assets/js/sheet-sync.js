@@ -37,11 +37,15 @@ function parseCSV(text) {
   return rows;
 }
 
+// بعض التبويبات (مثل "بعد المستفيدين") فيها صف عنوان ("الخطة التشغيلية") فوق
+// صف رؤوس الأعمدة الفعلي، لذا نبحث عن صف الرؤوس بدل افتراض أنه أول صف دائمًا.
 function csvToObjects(text) {
   const rows = parseCSV(text).filter((r) => r.some((c) => c.trim() !== ""));
   if (!rows.length) return [];
-  const header = rows[0].map((h) => h.trim());
-  return rows.slice(1).map((r) => {
+  const headerIdx = rows.findIndex((r) => r.some((c) => c.trim() === "المبادرة التنفيذية"));
+  const header = (headerIdx >= 0 ? rows[headerIdx] : rows[0]).map((h) => h.trim());
+  const dataRows = rows.slice((headerIdx >= 0 ? headerIdx : 0) + 1);
+  return dataRows.map((r) => {
     const obj = {};
     header.forEach((h, idx) => { obj[h] = (r[idx] ?? "").trim(); });
     return obj;
@@ -116,18 +120,38 @@ async function fetchPerspectiveRows(perspective, url) {
   return rows;
 }
 
-// يحاول تحديث DASHBOARD_DATA.initiatives من الشيت الحي. يُرجع حالة النتيجة
-// (نجاح/فشل) دون رمي استثناء، حتى يستمر عرض النسخة الاحتياطية عند الفشل.
+// نسخة أصلية من بيانات المصدر الاحتياطي (assets/js/data.js) محفوظة قبل أي مزامنة،
+// تُستخدم فقط للأبعاد التي يفشل جلبها من الشيت — حتى لا يؤدي فشل تبويب واحد
+// لفقدان بيانات الأبعاد الثلاثة الأخرى الناجحة.
+const FALLBACK_INITIATIVES = DASHBOARD_DATA.initiatives.slice();
+
+// يحاول تحديث DASHBOARD_DATA.initiatives من الشيت الحي، بُعدًا بُعد. يُرجع حالة
+// النتيجة (ok: true كامل / "partial" جزئي / false فشل الكل) دون رمي استثناء أبدًا.
 async function syncFromSheet() {
-  try {
-    const entries = await Promise.all(
-      Object.entries(SHEET_SOURCES).map(async ([key, url]) => [key, await fetchPerspectiveRows(key, url)])
-    );
-    const live = entries.flatMap(([, rows]) => rows);
-    DASHBOARD_DATA.initiatives = live;
+  const perspectiveKeys = Object.keys(SHEET_SOURCES);
+  const results = await Promise.allSettled(
+    perspectiveKeys.map((key) => fetchPerspectiveRows(key, SHEET_SOURCES[key]))
+  );
+
+  const combined = [];
+  const failed = [];
+  results.forEach((result, i) => {
+    const key = perspectiveKeys[i];
+    if (result.status === "fulfilled") {
+      combined.push(...result.value);
+    } else {
+      failed.push({ key, error: result.reason && result.reason.message ? result.reason.message : String(result.reason) });
+      combined.push(...FALLBACK_INITIATIVES.filter((it) => it.perspective === key));
+    }
+  });
+
+  DASHBOARD_DATA.initiatives = combined;
+  if (!failed.length) {
     DASHBOARD_DATA._sync = { ok: true, at: new Date() };
-  } catch (err) {
-    DASHBOARD_DATA._sync = { ok: false, at: new Date(), error: String(err && err.message ? err.message : err) };
+  } else if (failed.length === perspectiveKeys.length) {
+    DASHBOARD_DATA._sync = { ok: false, at: new Date(), error: failed.map((f) => f.error).join(" — ") };
+  } else {
+    DASHBOARD_DATA._sync = { ok: "partial", at: new Date(), error: failed.map((f) => f.error).join(" — ") };
   }
   return DASHBOARD_DATA._sync;
 }
