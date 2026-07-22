@@ -7,7 +7,6 @@ const SUPPORT_BADGE = {
   "داخلي": "muted",
   "مدعومة": "good",
 };
-const IMPACT_LABEL = { good: "منخفض", warning: "متوسط", serious: "مرتفع", critical: "حرج" };
 
 function fmtSAR(n) { return `${Number(n).toLocaleString("ar")} ريال`; }
 
@@ -184,19 +183,6 @@ function initTableControls() {
   document.getElementById("search-input").addEventListener("input", renderInitiativesTable);
 }
 
-function renderRisks() {
-  document.getElementById("risks-tbody").innerHTML = DASHBOARD_DATA.risks
-    .map(
-      (r) => `
-    <tr>
-      <td class="cell-desc" style="max-width:520px">${r.risk}</td>
-      <td>${badge(r.impact, IMPACT_LABEL[r.impact])}</td>
-      <td class="cell-nowrap">${r.likelihood}</td>
-    </tr>`
-    )
-    .join("");
-}
-
 function initTabs() {
   const links = document.querySelectorAll(".tab-link[data-view]");
   const views = document.querySelectorAll("section.view");
@@ -230,7 +216,6 @@ function renderAll() {
   renderKPIs();
   renderPerspectiveSummary();
   renderInitiativesTable();
-  renderRisks();
 }
 
 function renderSyncStatus() {
@@ -241,7 +226,9 @@ function renderSyncStatus() {
   if (sync.ok) {
     el.innerHTML = `<span class="badge badge-good"><span class="dot" style="background:var(--good)"></span>بيانات حيّة من الشيت — ${time}</span>`;
   } else {
-    el.innerHTML = `<span class="badge badge-warning"><span class="dot" style="background:var(--warning)"></span>تعذّر الاتصال بالشيت، يُعرض آخر نسخة محفوظة</span>`;
+    el.innerHTML = `
+      <span class="badge badge-warning"><span class="dot" style="background:var(--warning)"></span>تعذّر الاتصال بالشيت، يُعرض آخر نسخة محفوظة</span>
+      <div style="font-size:11px; color:var(--text-muted); margin-top:4px; max-width:420px">${sync.error || ""}</div>`;
   }
 }
 

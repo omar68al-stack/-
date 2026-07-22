@@ -87,14 +87,32 @@ function rowToInitiative(obj, perspective, idx) {
   };
 }
 
+const PERSPECTIVE_LABEL_FOR_ERRORS = {
+  beneficiaries: "بعد المستفيدين",
+  financial: "البعد المالي",
+  internal: "بعد العمليات الداخلية",
+  learning: "بعد التعلم والنمو",
+};
+
 async function fetchPerspectiveRows(perspective, url) {
-  const res = await fetch(url, { cache: "no-store" });
-  if (!res.ok) throw new Error(`HTTP ${res.status} — ${perspective}`);
+  let res;
+  try {
+    res = await fetch(url, { cache: "no-store" });
+  } catch (networkErr) {
+    // فشل على مستوى الشبكة قبل وصول أي استجابة — الحالة الأكثر شيوعًا لهذا هي
+    // رفض CORS من متصفح المستخدم (المتصفح يمنع قراءة الاستجابة رغم وصولها).
+    throw new Error(`تعذّر الوصول لتبويب "${PERSPECTIVE_LABEL_FOR_ERRORS[perspective]}" — على الأغلب رفض CORS من المتصفح. تفصيل: ${networkErr.message}`);
+  }
+  if (!res.ok) {
+    throw new Error(`تبويب "${PERSPECTIVE_LABEL_FOR_ERRORS[perspective]}" أعاد HTTP ${res.status} — تأكد أن التبويب منشور للويب.`);
+  }
   const text = await res.text();
   const rows = csvToObjects(text)
     .map((obj, idx) => rowToInitiative(obj, perspective, idx))
     .filter(Boolean);
-  if (!rows.length) throw new Error(`صف فارغ — ${perspective}`);
+  if (!rows.length) {
+    throw new Error(`تبويب "${PERSPECTIVE_LABEL_FOR_ERRORS[perspective]}" رجع بدون صفوف صالحة — تحقّق من رابط النشر أو أسماء الأعمدة.`);
+  }
   return rows;
 }
 

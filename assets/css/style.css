@@ -332,7 +332,6 @@ tbody tr:hover { background: var(--surface-2); }
 @media (prefers-color-scheme: dark) {
   :root:where(:not([data-theme="light"])) .badge-warning { color: var(--warning); }
 }
-.badge-serious { color: var(--serious); background: color-mix(in srgb, var(--serious) 16%, transparent); }
 .badge-critical { color: var(--critical); background: color-mix(in srgb, var(--critical) 14%, transparent); }
 .badge-muted { color: var(--text-muted); background: var(--surface-2); }
 

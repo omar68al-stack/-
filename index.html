@@ -28,8 +28,6 @@
   <nav class="tabs">
     <button class="tab-link active" data-view="view-overview">نظرة عامة</button>
     <button class="tab-link" data-view="view-projects">المبادرات والمشاريع</button>
-    <button class="tab-link" data-view="view-risks">المخاطر</button>
-    <button class="tab-link" data-view="view-about">عن الخطة</button>
   </nav>
 
   <!-- نظرة عامة -->
@@ -66,49 +64,6 @@
           </thead>
           <tbody id="projects-tbody"></tbody>
         </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- المخاطر -->
-  <section class="view" id="view-risks">
-    <h2 class="section-title">ملاحظات ومخاطر استراتيجية</h2>
-    <p class="section-sub">مستخلصة مباشرة من أرقام الخطة التشغيلية الحالية</p>
-    <div class="card">
-      <div class="table-wrap">
-        <table>
-          <thead><tr><th>الملاحظة / المخاطرة</th><th>مستوى الأثر</th><th>احتمالية الحدوث</th></tr></thead>
-          <tbody id="risks-tbody"></tbody>
-        </table>
-      </div>
-    </div>
-  </section>
-
-  <!-- عن الخطة -->
-  <section class="view" id="view-about">
-    <h2 class="section-title">عن الخطة التشغيلية</h2>
-    <p class="section-sub">جمعية إعمار المرافق — الذراع التنفيذي للأمانة</p>
-    <div class="grid grid-2">
-      <div class="card">
-        <h3>منهجية الخطة</h3>
-        <p style="font-size:13px; line-height:1.9; color:var(--text-secondary); margin-top:14px">
-          تُبنى الخطة التشغيلية وفق أربعة أبعاد استراتيجية (بطاقة الأداء المتوازن):
-          <b style="color:var(--text-primary)">بعد المستفيدين</b>،
-          <b style="color:var(--text-primary)">البعد المالي</b>،
-          <b style="color:var(--text-primary)">بعد العمليات الداخلية</b>، و
-          <b style="color:var(--text-primary)">بعد التعلم والنمو</b>.
-          كل مبادرة تنفيذية مرتبطة ببُعد واحد، ولها مؤشر أداء ومستهدف ومسؤول وميزانية وفترة زمنية محددة.
-        </p>
-      </div>
-      <div class="card">
-        <h3>ملاحظة حول البيانات</h3>
-        <p style="font-size:13px; line-height:1.9; color:var(--text-secondary); margin-top:14px">
-          يجيب الموقع أحدث أرقام المبادرات مباشرة من شيت Google التشغيلي عند كل فتح للصفحة (وعند الضغط على زر "تحديث").
-          عمود "المتبقي" يُحسب في هذه اللوحة كـ (الميزانية − المصروف) بدل الاعتماد على عمود المتبقي في الشيت مباشرة
-          بسبب خطأ في معادلته الأصلية في تبويب "بعد المستفيدين".
-          إذا تعذّر الاتصال بالشيت (لا إنترنت مثلًا)، يعرض الموقع تلقائيًا آخر نسخة محفوظة محليًا
-          (<code>assets/js/data.js</code>) — وتظهر إشارة بذلك بجانب زر التحديث أعلى الصفحة.
-        </p>
       </div>
     </div>
   </section>
