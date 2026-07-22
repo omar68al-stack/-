@@ -63,8 +63,9 @@ function computeAggregates() {
   const perspectiveStats = PERSPECTIVES.map((p) => {
     const items = inits.filter((i) => i.perspective === p.key);
     const budget = items.reduce((s, i) => s + i.budget, 0);
+    const spent = items.reduce((s, i) => s + i.spent, 0);
     const progress = items.length ? Math.round(items.reduce((s, i) => s + initiativeProgress(i), 0) / items.length) : 0;
-    return { ...p, budget, progress, count: items.length };
+    return { ...p, budget, spent, progress, count: items.length };
   });
 
   return { totalBudget, totalSpent, avgProgress, planElapsed, perspectiveStats };
@@ -98,7 +99,7 @@ function renderPerspectiveSummary() {
       (p) => `
     <div class="goal-card ${p.key === topKey ? "highlight" : ""}">
       <div class="goal-name">${p.name}</div>
-      <div class="goal-budget">${p.budget.toLocaleString("ar")} ر.س</div>
+      <div class="goal-budget">${p.budget.toLocaleString("ar")} ر.س<span class="goal-spent">المنصرف: ${p.spent.toLocaleString("ar")} ر.س</span></div>
       <div class="goal-meta-row">
         <span class="goal-count-badge">${p.count}</span> عدد المبادرات
       </div>
@@ -148,7 +149,7 @@ function renderInitiativesTable() {
         </div>
       </td>
       <td class="cell-nowrap">${i.kpi}: ${achievedLabel(i)} / ${targetLabel(i)}</td>
-      <td class="cell-nowrap">${fmtSAR(i.budget)}</td>
+      <td class="cell-nowrap">${fmtSAR(i.budget)}<span class="budget-spent-line">المنصرف: ${fmtSAR(i.spent)}</span></td>
       <td class="cell-nowrap">${i.owner}</td>
       <td>${supportBadge(i.support)}</td>
     </tr>
