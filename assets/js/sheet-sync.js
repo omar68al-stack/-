@@ -1,11 +1,14 @@
-// يجيب أحدث بيانات المبادرات مباشرة من شيت Google (منشور للويب) عند فتح الموقع.
-// إذا تعذّر الاتصال (لا إنترنت، أو تغيّرت إعدادات النشر)، يبقى الموقع يعرض
+// يجيب أحدث بيانات المبادرات مباشرة من شيت Google عند فتح الموقع، عبر رابط
+// التصدير المباشر (export) بدل لقطة "النشر على الويب" — التصدير المباشر يقرأ
+// محتوى الشيت الفعلي لحظيًا (يتطلب مشاركة الشيت كـ "أي شخص لديه الرابط: عارض")،
+// بينما لقطة النشر تتجمّد أحيانًا ولا تتحدّث مع كل تعديل.
+// إذا تعذّر الاتصال (لا إنترنت، أو تغيّرت صلاحية المشاركة)، يبقى الموقع يعرض
 // النسخة الاحتياطية المدمجة في assets/js/data.js دون أي كسر.
 
-const SHEET_PUBLISH_KEY = "2PACX-1vTNSfD9g7SkK6d8T89Rdb5bTrf1X_sYVZVrbo1LvrLcwVFZjAB439-jAxLJye2oYw";
+const SHEET_ID = "1MO_9TCHvyLKUcizX02V6ZKWiKPPVbVY1";
 
 function sheetCsvUrl(gid) {
-  return `https://docs.google.com/spreadsheets/d/e/${SHEET_PUBLISH_KEY}/pub?gid=${gid}&single=true&output=csv`;
+  return `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${gid}`;
 }
 
 const SHEET_SOURCES = {
