@@ -47,6 +47,19 @@ function statusBadge(statusLabel) {
 function supportBadge(label) {
   return badge(SUPPORT_BADGE[label] || "muted", label);
 }
+function looksLikeUrl(s) {
+  const v = (s || "").trim();
+  return /^(https?:\/\/|www\.)/i.test(v) || /^[a-z0-9-]+(\.[a-z0-9-]+)*\.[a-z]{2,}(\/|$)/i.test(v);
+}
+function reportLinkHtml(closureReport, label) {
+  const value = (closureReport || "").trim();
+  if (!value) return "";
+  const href = looksLikeUrl(value) ? (value.startsWith("http") ? value : `https://${value}`) : null;
+  if (href) {
+    return `<a href="${href}" target="_blank" rel="noopener" class="report-link" onclick="event.stopPropagation()">📄 ${label}</a>`;
+  }
+  return `<span class="report-link report-link-text">📄 ${label}: ${value}</span>`;
+}
 function perspectivePill(key) {
   const p = PERSPECTIVE_BY_KEY[key];
   return `<span class="pill" style="background:color-mix(in srgb, var(${p.seriesVar}) 16%, transparent); color:var(${p.seriesVar})">${p.name}</span>`;
@@ -140,7 +153,7 @@ function renderInitiativesTable() {
       return `
     <tr class="init-row" data-target="${rowId}" style="cursor:pointer">
       <td>${perspectivePill(i.perspective)}</td>
-      <td class="cell-nowrap">${i.name} <span style="color:var(--text-muted); font-size:11px">ⓘ</span></td>
+      <td class="cell-nowrap">${i.name} <span style="color:var(--text-muted); font-size:11px">ⓘ</span> ${reportLinkHtml(i.closureReport, "التقرير")}</td>
       <td>${statusBadge(status)}</td>
       <td>
         <div class="progress-cell">
@@ -158,6 +171,7 @@ function renderInitiativesTable() {
         <div class="cell-desc" style="max-width:none; padding:4px 2px">
           ${i.description}<br/>
           <span style="color:var(--text-muted)">الفترة: ${i.start} — ${i.end} · الوقت المنقضي من مدة المبادرة: ${elapsedPct(i)}%</span>
+          ${i.closureReport ? `<br/><span style="margin-top:6px; display:inline-block">${reportLinkHtml(i.closureReport, "عرض تقرير الإغلاق")}</span>` : ""}
         </div>
       </td>
     </tr>`;

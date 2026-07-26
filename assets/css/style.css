@@ -323,6 +323,22 @@ tbody tr:hover { background: var(--surface-2); }
   white-space: nowrap;
 }
 
+.report-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
+  font-size: 11px;
+  font-weight: 600;
+  color: var(--brand-text);
+  background: var(--brand-tint);
+  border-radius: 999px;
+  padding: 2px 9px;
+  text-decoration: none;
+  white-space: nowrap;
+}
+.report-link:hover { filter: brightness(0.95); }
+.report-link-text { color: var(--text-secondary); background: var(--surface-2); cursor: default; }
+
 .badge {
   display: inline-flex;
   align-items: center;

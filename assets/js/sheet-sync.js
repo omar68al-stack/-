@@ -91,6 +91,7 @@ function rowToInitiative(obj, perspective, idx) {
     budget: parseNum(obj["التكلفة المالية"]),
     spent: parseNum(obj["المصروف"]),
     support: (obj["توفر الدعم"] || "داخلي").trim(),
+    closureReport: (obj["تقرير الاغلاق"] || obj["تقرير الإغلاق"] || "").trim(),
   };
 }
 
